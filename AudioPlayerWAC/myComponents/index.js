@@ -763,6 +763,32 @@ class MyAudioPlayer extends HTMLElement {
 
   // listeners
   next() {
+    // Michel Buffa : next, in dicography mode (one single file with all song extracts)
+    // next will go to the next album
+    let index = Math.floor(this.player.currentTime / this.songSegmentDuration);
+
+    if(!this.allSongs[index]) {
+      this.player.currentTime = this.allSongs.length * this.songSegmentDuration;
+      return;
+    }
+
+    let albumName = this.allSongs[index].albumName;
+
+    // look for the first song of the next album
+    let i = index;
+    while(this.allSongs[i].albumName === albumName) {
+      i++;
+      if(!this.allSongs[i]) {
+        this.player.currentTime = 0;
+        this.player.pause;
+        return;
+      }
+    }
+    index = i;
+    // let's fast forward the player to the new "currentTime" for the beginning of the new album
+    let newAlbumStartingTime = index*this.songSegmentDuration;
+    this.player.currentTime = newAlbumStartingTime;
+    /*
     console.log("playlist has", this.playlist.length, "tracks");
     if (this.playlist.length - 1 > this.currentNbTrack) {
       console.log("playlist has", this.playlist.length, "tracks");
@@ -778,9 +804,30 @@ class MyAudioPlayer extends HTMLElement {
       this.shadowRoot.querySelector(".marqueeText").textContent = this.playlist[this.currentNbTrack].name;
     }
     setTimeout(() => { this.shadowRoot.querySelector("#play").src = this.pauseImage; this.player.play(); }, 1000);
+    */
   }
 
   previous() {
+    // Michel Buffa : next, in dicography mode (one single file with all song extracts)
+    // next will go to the next album
+    let index = Math.floor(this.player.currentTime / this.songSegmentDuration);
+
+    let albumName = this.allSongs[index].albumName;
+
+    // look for the first song of the next album
+    let i = index;
+    while(this.allSongs[i].albumName === albumName) {
+      i--;
+      if(i < 0) {
+        this.player.currentTime = 0;
+        return;
+      }
+    }
+    index = i;
+    // let's fast forward the player to the new "currentTime" for the beginning of the new album
+    let newAlbumStartingTime = index*this.songSegmentDuration;
+    this.player.currentTime = newAlbumStartingTime;
+    /*
     if (this.currentNbTrack === 0) {
       this.currentNbTrack = this.playlist.length - 1;
       this.player.src = this.playlist[this.currentNbTrack].src;
@@ -792,6 +839,7 @@ class MyAudioPlayer extends HTMLElement {
       this.shadowRoot.querySelector(".marqueeText").textContent = this.playlist[this.currentNbTrack].name;
     }
     setTimeout(() => { this.player.play(); }, 1000);
+    */
   }
 
   play() {
@@ -801,9 +849,11 @@ class MyAudioPlayer extends HTMLElement {
         this.player.ontimeupdate = () => {
           // check which song extract is being played...
           const index = Math.floor(this.player.currentTime / this.songSegmentDuration);
+          if(!this.allSongs[index]) return;
 
           let artist = this.discography.discographyFolder.replace("_discography", "");
 
+          
           let albumName = this.allSongs[index].albumName;
           albumName = albumName.substring(3);
 
