@@ -78,6 +78,15 @@ template.innerHTML = /*html*/`
     top: 10px;
   }
 
+  /*.current {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+    left: 50%;
+  }*/
+
   .marqueeText {
     font-size: 14px;
     color: black;
@@ -132,10 +141,10 @@ template.innerHTML = /*html*/`
     display: inline-block;
     width: max-content;
   
-    padding-left: 100%;
+    /* padding-left: 100%; */
     /* show the marquee just outside the paragraph */
-    will-change: transform;
-    animation: marquee 15s linear infinite;
+    /* will-change: transform;
+    animation: marquee 15s linear infinite;*/
   }
   
   .marquee span:hover {
@@ -251,6 +260,9 @@ template.innerHTML = /*html*/`
         </span>
       </p>
 
+      <div class="timeline">
+        <div class="progress"></div>
+      </div>
       <div id="visualisations">
         <div class="Preview1">
           <canvas id="balance" width=300 height=100></canvas>
@@ -262,9 +274,7 @@ template.innerHTML = /*html*/`
           <canvas id="spectrum" width=300 height=100></canvas>
         </div>
       </div>
-      <div class="timeline">
-        <div class="progress"></div>
-      </div>
+      
     </div>
 
     <div id='volSpeed'>
@@ -364,19 +374,10 @@ class MyAudioPlayer extends HTMLElement {
       currentNode = this.filters[i];
     }
 
-
-
-    //WHITHOUT FILTER
-    // currentNode.connect(this.analyser);
-    // this.analyser.connect(this.stereoPanner);
-    // this.stereoPanner.connect(this.audioContext.destination);
-    // this.stereoPanner.connect(this.splitter);
-
     this.filterNode = this.audioContext.createBiquadFilter();
     this.filterNode.type = "lowpass";
     this.filterNode.frequency.value = 11025;
     
-
     currentNode.connect(this.filterNode);
 
     this.filterNode.connect(this.analyser);
@@ -386,28 +387,12 @@ class MyAudioPlayer extends HTMLElement {
     this.stereoPanner.connect(this.splitter);
 
     this.player.volume = 0.5;
-
-
-    // this.filters.forEach((filter, index) => {
-    //   this.shadowRoot.querySelector("#eq" + index).oninput = (event) => {
-    //     this.changeSpecificFreqGain(parseFloat(event.target.value), index);
-
-    //     console.log("gain =  " + parseFloat(event.target.value) + " " + filter);
-    //   }
-    // });
-
-
-
-
   }
 
   clearAllCanvas() {
     this.canvasContextS.save();
     this.canvasContextB.save();
     this.canvasContextV.save();
-
-
-
     // clear the canvas
     // like this: canvasContext.clearRect(0, 0, width, height);
 
@@ -425,9 +410,7 @@ class MyAudioPlayer extends HTMLElement {
     this.canvasContextB.restore();
     this.canvasContextV.restore();
 
-      this.previousLiAlbum;
-
-
+    // this.previousLiAlbum;
 
   }
 
@@ -505,8 +488,8 @@ class MyAudioPlayer extends HTMLElement {
       })();
 
       // for displaying current extract being played
-      this.extractBeingPlayedDiv = this.shadowRoot.querySelector(".songSegmentName");
-      this.albumBeingPlayedDiv = this.shadowRoot.querySelector(".albumName");
+      // this.extractBeingPlayedDiv = this.shadowRoot.querySelector(".songSegmentName");
+      // this.albumBeingPlayedDiv = this.shadowRoot.querySelector(".albumName");
 
     }
 
@@ -515,58 +498,59 @@ class MyAudioPlayer extends HTMLElement {
     this.defineListeners();
   }
 
-async buildPlaylist() {
+  async buildPlaylist() {
 
-  // for displaying album names
-  this.albumNamesListUL = this.shadowRoot.querySelector("#albumNamesList");
+    // for displaying album names
+    this.albumNamesListUL = this.shadowRoot.querySelector("#albumNamesList");
 
 
-  // fetch discography from wac server
-  const baseURL = "http://localhost:8010";
-  const apiURL = baseURL + "/api";
+    // fetch discography from wac server
+    const baseURL = "http://localhost:8010";
+    const apiURL = baseURL + "/api";
 
-  const discographyURL = apiURL + "/" + "discography";
-  const reponse = await fetch(discographyURL);
-  this.discography = await reponse.json();
+    const discographyURL = apiURL + "/" + "discography";
+    const reponse = await fetch(discographyURL);
+    this.discography = await reponse.json();
 
-  this.playlist = [];
-  const discographyThumbnailURI = baseURL + "/" + this.discography.discographyFolder + "/out/discography_thumbnail.mp3";
-  this.playlist.push({
-    name: "discography_thumbnail.mp3",
-    src: discographyThumbnailURI
-  });
+    this.playlist = [];
+    const discographyThumbnailURI = baseURL + "/" + this.discography.discographyFolder + "/out/discography_thumbnail.mp3";
+    this.playlist.push({
+      name: "discography_thumbnail.mp3",
+      src: discographyThumbnailURI
+    });
 
-  // compute a flat array with all songs from all albums
-  this.allSongs = [];
-  this.songSegmentDuration = this.discography.interval;
+    // compute a flat array with all songs from all albums
+    this.allSongs = [];
+    this.songSegmentDuration = this.discography.interval;
 
-  const albums = this.discography.albums;
-  this.albumNamesList = [];
+    const albums = this.discography.albums;
+    this.albumNamesList = [];
 
-  albums.forEach((a, index) => {
-    const albumName = a.nom;
-    this.albumNamesList.push(albumName);
+    albums.forEach((a, index) => {
+      const albumName = a.nom;
+      this.albumNamesList.push(albumName);
 
-    a.songs.forEach(song => {
-      this.allSongs.push({
-        albumName: albumName,
-        albumIndex: index,
-        songName: song
-      });
-    })
-  });
+      a.songs.forEach(song => {
+        this.allSongs.push({
+          albumName: albumName,
+          albumIndex: index,
+          songName: song
+        });
+      })
+    });
 
-  //console.log(this.albumNamesList);
-  // update ul of album names
-  // this.albumNamesList.forEach((name, index) => {
-  //   let li = document.createElement("li");
-  //   li.id = "album_" + index;
-  //   li.innerHTML = name;
+    //console.log(this.albumNamesList);
+    // update ul of album names
+    // this.albumNamesList.forEach((name, index) => {
+    //   let li = document.createElement("li");
+    //   li.id = "album_" + index;
+    //   li.innerHTML = name;
 
-  //   this.albumNamesListUL.append(li);
-  // }); 
+    //   this.albumNamesListUL.append(li);
+    // }); 
 
-}
+  }
+
   drawProgressBar() {
     setInterval(() => {
       const progressBar = this.shadowRoot.querySelector(".progress");
@@ -770,6 +754,14 @@ async buildPlaylist() {
     });
   }
 
+  changeSpecificFreqGain(sliderVal, nbFreqEq) {
+    const value = parseFloat(sliderVal);
+
+    console.log(nbFreqEq, this.filters.length);
+    this.filters[nbFreqEq].gain.value = value;
+  }
+
+  // listeners
   next() {
     console.log("playlist has", this.playlist.length, "tracks");
     if (this.playlist.length - 1 > this.currentNbTrack) {
@@ -788,26 +780,27 @@ async buildPlaylist() {
     setTimeout(() => { this.shadowRoot.querySelector("#play").src = this.pauseImage; this.player.play(); }, 1000);
   }
 
-
-  changeSpecificFreqGain(sliderVal, nbFreqEq) {
-    const value = parseFloat(sliderVal);
-
-    console.log(nbFreqEq, this.filters.length);
-    this.filters[nbFreqEq].gain.value = value;
+  previous() {
+    if (this.currentNbTrack === 0) {
+      this.currentNbTrack = this.playlist.length - 1;
+      this.player.src = this.playlist[this.currentNbTrack].src;
+      this.shadowRoot.querySelector(".marqueeText").textContent = this.playlist[this.currentNbTrack].name;
+    }
+    else {
+      this.currentNbTrack -= 1;
+      this.player.src = this.playlist[this.currentNbTrack].src;
+      this.shadowRoot.querySelector(".marqueeText").textContent = this.playlist[this.currentNbTrack].name;
+    }
+    setTimeout(() => { this.player.play(); }, 1000);
   }
 
-
-  defineListeners() {
-
-    this.shadowRoot.querySelector("#play").onclick = () => {
-      let image = this.shadowRoot.querySelector("#play").src
+  play() {
+    let image = this.shadowRoot.querySelector("#play").src
       if (image.includes('play')) {
 
         this.player.ontimeupdate = () => {
-          // console.log("current time = " + this.player.currentTime);
           // check which song extract is being played...
           const index = Math.floor(this.player.currentTime / this.songSegmentDuration);
-          // console.log("index = " + index);
 
           let artist = this.discography.discographyFolder.replace("_discography", "");
 
@@ -815,17 +808,6 @@ async buildPlaylist() {
           albumName = albumName.substring(3);
 
           this.shadowRoot.querySelector(".marqueeText").textContent = `${artist} - ${albumName} - ${this.allSongs[index].songName}`;
-          //this.albumBeingPlayedDiv.innerHTML = `${artist} - ${albumName} - ${this.allSongs[index].songName}`;
-          //this.extractBeingPlayedDiv.innerHTML = this.allSongs[index].songName;
-
-          // highlight current album in the displayed list
-          // const albumIndex = this.allSongs[index].albumIndex;
-          // let liAlbum = this.shadowRoot.querySelector("#album_" + albumIndex);
-          // if(this.previousLiAlbum)
-          //   this.previousLiAlbum.classList.remove("albumHighlighted")
-
-          // liAlbum.classList.add("albumHighlighted");
-          // this.previousLiAlbum = liAlbum;
         }
         this.shadowRoot.querySelector("#play").src = this.pauseImage
         this.player.play();
@@ -834,7 +816,11 @@ async buildPlaylist() {
         this.shadowRoot.querySelector("#play").src = this.playImage
         this.player.pause()
       }
-    }
+  }
+
+  defineListeners() {
+
+    this.shadowRoot.querySelector("#play").onclick = () => this.play()
 
     // this.shadowRoot.querySelector("#pause").onclick = () => {
     //   this.player.pause();
@@ -844,25 +830,9 @@ async buildPlaylist() {
     //   this.player.currentTime += 10;
     // }
 
-    this.shadowRoot.querySelector("#next").onclick = () => {
+    this.shadowRoot.querySelector("#next").onclick = () => this.next()
 
-      this.next();
-    }
-
-    this.shadowRoot.querySelector("#previous").onclick = () => {
-      if (this.currentNbTrack === 0) {
-        this.currentNbTrack = this.playlist.length - 1;
-        this.player.src = this.playlist[this.currentNbTrack].src;
-        this.shadowRoot.querySelector(".marqueeText").textContent = this.playlist[this.currentNbTrack].name;
-      }
-      else {
-        this.currentNbTrack -= 1;
-        this.player.src = this.playlist[this.currentNbTrack].src;
-        this.shadowRoot.querySelector(".marqueeText").textContent = this.playlist[this.currentNbTrack].name;
-      }
-      setTimeout(() => { this.player.play(); }, 1000);
-    }
-
+    this.shadowRoot.querySelector("#previous").onclick = () => this.previous()
 
     // this.shadowRoot.querySelector("#sliderSpeed").oninput = (event) => {
     //   this.player.playbackRate = parseFloat(event.target.value);
@@ -904,6 +874,16 @@ async buildPlaylist() {
     };
 
 
+  }
+
+  // return the information being displayed
+  getPlayerInfo() {
+    return this.shadowRoot.querySelector(".marqueeText").textContent
+  }
+
+  // to know whether is playing or not
+  isPlaying() {
+    return !this.player.paused
   }
 
 
