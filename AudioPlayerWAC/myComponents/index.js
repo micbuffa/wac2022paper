@@ -8,35 +8,42 @@ const template = document.createElement("template");
 template.innerHTML = /*html*/`
   <style>
 
+  .container{
+    background: #f5f5f5;
+  }
+
   p{
     font-weight: bold;
     color: white;
     font-size: 1.5em;
     margin: 5px;
   }
+
   label{
     font-weight: bold;
     color: white;
     font-size: 1em; 
   }
+
   span, label {
       font-weight: bold;
       color: white;
       font-size: 1em;
   }
+
   .albumHighlighted {
     color:yellow;
     font-weight: bold;
     transform: scale(1.2, 1.2)
   }
+
   .audio-player-info {
     height: 50px;
     width: 350px;
-    background: #444;
-    box-shadow: 0 0 20px 0 #000a;
-  
-    font-family: arial;
-    color: white;
+    /* background: #f5f5f5; */
+    /* box-shadow: 0 0 20px 0 #000a; */
+
+    color: black;
     font-size: 0.75em;
     overflow: hidden;
   
@@ -45,42 +52,35 @@ template.innerHTML = /*html*/`
     align-items: center;
   }
 
-.labelVolSpeed {
-  color:black;
-}
+  .labelVolSpeed {
+    color:black;
+    font-size: 12px;
+  }
+
   .timeline {
-    background: white;
+    background: #fff;
     width: 100%;
     position: relative;
     cursor: pointer;
-    box-shadow: 0 2px 10px 0 #0008;
-
+    height: 5px;
   }
+
   .progress {
-    background: purple;
+    background: #8fce00;
     width: 0%;
     height: 100%;
   }
+
   .time {
     text-align: center;
-  }
-
-  .songSegmentName {
-    margin-top:10px;
-    text-align: center;
-    color:white;
-  }
-
-  .albumName {
-    margin-top:10px;
-    text-align: center;
-    color:white;
+    width: 6vw;
+    position: relative;
+    top: 10px;
   }
 
   .marqueeText {
-    font-size: 1em;
-    color: "orange";
-    font-family: 'ds-digitalnormal' !important;
+    font-size: 14px;
+    color: black;
   }
 
   div audio {
@@ -88,10 +88,7 @@ template.innerHTML = /*html*/`
     margin-bottom:10px;
     margin-left:10px;
   }
-  
-  #balance {
-    border:1px solid;
-  }
+
   .main {
     margin: 32px;
     border:1px solid;
@@ -123,8 +120,9 @@ template.innerHTML = /*html*/`
      font-family: "Open Sans",Verdana,Geneva,sans-serif,sans-serif;
     font-size: 12px;
   }
+
   .marquee {
-    width: 17vw;
+    width: 100%;
     margin: 0 auto;
     overflow: hidden;
     box-sizing: border-box;
@@ -165,32 +163,29 @@ template.innerHTML = /*html*/`
     }
   }
 
-  
- 
-
   .buttonActions {
-    background: #1f1f1f;
+    width: 15px;
+    height: 15px;
     border: none;
     outline: none;
-    color: white;
     font-family: inherit;
     font-weight: 400;
     font-size: 20px;
-    border-radius: 3px;
-    box-shadow: 0 5px 0px #000000;
-    border-bottom: 2px solid #000000;
+    cursor: pointer;
+    margin-left: 5px;
   }
+
+
   .buttonActions:hover {
-    background: #262626;
-    box-shadow: 0 4px 1px #262626;
-    border-bottom: 2px solid #262626;
     transition: all 0.1s ease-in;
   }
+
   .buttonActions:active {
     transform: translateY(4px);
     border-bottom-width: 2px;
     box-shadow: none;
   }
+
   .buttonActions:after {
     transform: translateY(4px);
     border-bottom-width: 2px;
@@ -198,231 +193,92 @@ template.innerHTML = /*html*/`
   }
   
   canvas {
-    height:40px;
-    width: 200px
+    height: 40px;
+    width: calc(75vw / 3 - 5px)
   }
 
   #visualisations {
-    width:650px;
-    display:flex;
+    width: 75vw;
+    display: flex;
     justify-content:space-between;
   }
   
-  #infoActions {
-    width:750px;
-    display:flex;
+  .playerInfo{
+    display: flex;
     flex-direction:row;
     justify-content:space-between;
+    width: 100vw;
   }
+
+  #ctrls {
+    position: relative;
+    top: 20px;
+    vertical-align: baseline;
+    width: 6vw;
+    display: flex;
+    justify-content:space-between;
+  } 
+
+  #volSpeed {
+    position: relative;
+    vertical-align: baseline;
+    width: 13vw;
+  }
+  
+
   </style>
 
-
   <div class="container">
-  <audio id="myPlayer" crossorigin="anonymous">
-  
-  </audio>
-  <br>
-  <div id="visualisations">
-    <div class="Preview1">
-       <canvas id="balance" width=300 height=100></canvas>
-    </div>
-    <div class="Preview2">
-       <canvas id="visual" width=300 height=100></canvas>
-    </div>
-    <div class="Preview3">
-       <canvas id="spectrum" width=300 height=100></canvas>
-    </div>
-  </div>
+  <audio id="myPlayer" crossorigin="anonymous"></audio>
 
-    <div id="infoActions">
-      <div class="playerInfo">
-        <div class="audio-player-info">
-            <div class="timeline">
-              <div class="progress"></div>
-            </div>
-            <div class="time" >
-              <div class="current">0:00</div>
-                <p class="marquee">
-                  <span class="marqueeText">
-                        Nom du fichier 
-                  </span>
-                </p>
-            </div>
+  <div class="playerInfo">
+    <div>
+      <div class="time" >
+          <div class="current">0:00</div>
+      </div>
+      <div id="ctrls">
+        <image class="buttonActions" id="previous" src='./myComponents/assets/imgs/previous.png'>
+        <image class="buttonActions" id="play" src='./myComponents/assets/imgs/play.png'>
+        <!-- <image class="buttonActions" id="pause" src='./myComponents/assets/imgs/pause.png'> -->
+        <image class="buttonActions" id="next" src='./myComponents/assets/imgs/next.png'>
+      </div>
+    </div>
+
+    <div>
+      <p class="marquee">
+        <span class="marqueeText">
+          Title of audio
+        </span>
+      </p>
+
+      <div id="visualisations">
+        <div class="Preview1">
+          <canvas id="balance" width=300 height=100></canvas>
+        </div>
+        <div class="Preview2">
+          <canvas id="visual" width=300 height=100></canvas>
+        </div>
+        <div class="Preview3">
+          <canvas id="spectrum" width=300 height=100></canvas>
         </div>
       </div>
+      <div class="timeline">
+        <div class="progress"></div>
+      </div>
+    </div>
 
-      <div class="Actions">
-      <input class="buttonActions" id="play" type="button" value="Play">
-      <input class="buttonActions" id="pause" type="button" value="Pause">
-      <input class="buttonActions" id="avance10" type="button" value="+10sec">
-      <input class="buttonActions" id="previous" type="button" value="previous">
-      <input class="buttonActions" id="next" type="button" value="next">
-
-      <br>
-      <p class="labelVolSpeed">Speed
-        <webaudio-knob id="sliderSpeed" 
-                      sprites="30"
-                      value=1 min=0 max=4 step=0.5
-                      src="./assets/imgs/Slider1.png" 
-                      tooltip="Speed: x %s"
-        >
-        </webaudio-knob>
-        </p>
-        <p class="labelVolSpeed">Volume
-          <webaudio-knob id="volumeKnob" 
-                        sprites="30"
-                        value=1 min=0 max=1 step=0.01
-                        src="./assets/imgs/Slider1.png" 
-                        tooltip="Volume: x %s"
-          >
-          </webaudio-knob>
-          </p>
-  </div>
+    <div id='volSpeed'>
+      <div>
+        <label class="labelVolSpeed" for="volume">Volume</label> <br>
+        <input type="range" id="volumeKnob" name="volume" min="0" max="1" step="0.01" value=1>
+      </div>
+      <div>
+        <label class="labelVolSpeed" for="volume">Speed</label> <br>
+        <input type="range" id="sliderSpeed" name="volume" min="0" max="4" step="0.5" value=1>
+      </div>
+    </div>
   </div>
       
- 
-
-    </div>
-    <div class="VUL" style="display:none">
-        <webaudio-knob id="peakL" 
-        src="./assets/imgs/VU_1.png"
-        with="353"
-        height="158"
-        sprites="200"
-        value=0 min=0 max=10 step=1
-        diameter="300" 
-        tooltip="power left: %d">
-      </webaudio-knob>
-    </div>
-    <div class="VUR" style="display:none">
-      <webaudio-knob id="peakR" 
-      src="./assets/imgs/VU_1.png"
-      with="353"
-      height="158"
-      sprites="200"
-      value=0 min=0 max=10 step=1
-      diameter="300" 
-      tooltip="power right: %d">
-    </webaudio-knob>
-    </div>
-
-<div class="Equalizer" style="display:none">
-   <ul id="albumNamesList">
-   </ul>
-</div>
-
-<div style="display:none">
-    <div class="Equalizer1" >
-    <label>60Hz</label>
-
-    <webaudio-knob id="eq0" 
-    sprites="29"
-        value=0 min=-30 max=30 step=1
-    src="./assets/imgs/sliderEq.png" 
-    tooltip="Freq: x %s">
-    </webaudio-knob>
-
-    <label>170Hz</label>
-
-    <webaudio-knob id="eq1" 
-    sprites="29"
-    value=0 min=-30 max=30 step=1
-    src="./assets/imgs/sliderEq.png" 
-    tooltip="Freq: x %s">
-    </webaudio-knob>
-
-    <label>350Hz</label>
-
-    <webaudio-knob id="eq2" 
-    sprites="29"
-        value=0 min=-30 max=30 step=1
-    src="./assets/imgs/sliderEq.png" 
-    tooltip="Freq: x %s">
-    </webaudio-knob>
-
-    <label>1000Hz</label>
-
-    <webaudio-knob id="eq3" 
-    sprites="29"
-        value=0 min=-30 max=30 step=1
-    src="./assets/imgs/sliderEq.png" 
-    tooltip="Freq: x %s">
-    </webaudio-knob>
-
-    <label>3500Hz</label>
-
-    <webaudio-knob id="eq4" 
-    sprites="29"
-        value=0 min=-30 max=30 step=1
-    src="./assets/imgs/sliderEq.png" 
-    tooltip="Freq: x %s">
-    </webaudio-knob>
-
-    <label>10000Hz</label>
-
-    <webaudio-knob id="eq5" 
-    sprites="29"
-        value=0 min=-30 max=30 step=1
-    src="./assets/imgs/sliderEq.png" 
-    tooltip="Freq: x %s">
-    </webaudio-knob>
-    </div>
-    </div>
-
- 
-    <div style="display:none">
-    <p>Balance</p>
-    <webaudio-knob id="balanceKnob" 
-      src="./assets/imgs/knob_black.png" 
-      value=0 min=-1 max=1 step=0.01
-      diameter="64" 
-      tooltip="Balance: %s">
-    </webaudio-knob>
-    <br/>
-    <span>Left</span>
-    <span>/</span>
-    <span>Right</span>
-    </div>
-
-    <div class="Balance" style="display:none">
-
-    <p>Frequency</p>
-    <span>Low</span>
-    <webaudio-knob id="freqSlider" 
-    sprites="100"
-    value=11025 min=0 max=22050 step=1
-    src="./assets/imgs/Sonatom_bipo.png" 
-    tooltip="frequency: %s">
-    </webaudio-knob>
-    <span>High</span>
-    <br/>
-    <p>Detune</p>
-    <webaudio-knob id="detuneSlider" 
-    sprites="4"
-    value=100 min=0 max=100 step=1
-    src="./assets/imgs/SliderDetune.png" 
-    tooltip="detune: x %s">
-    </webaudio-knob>
-    <br/>
-    <br/>
-
-    <label>Type</label>
-    <select id="biquadFilterTypeSelector">
-        <option value="lowpass" selected>lowpass</option>
-        <option value="highpass">highpass</option>
-        <option value="bandpass">bandpass</option>
-        <option value="lowshelf">lowshelf</option>
-        <option value="highshelf">highshelf</option>
-        <option value="peaking">peaking</option>
-        <option value="notch">notch</option>
-        <option value="allpass">allpass</option>
-    </select>
-</div>
-    </div>
-    
-
-
-
 </html>
   `;
 
@@ -435,6 +291,9 @@ class MyAudioPlayer extends HTMLElement {
     // Récupération des attributs HTML
     // On crée un shadow DOM
     this.attachShadow({ mode: "open" });
+
+    this.playImage = './myComponents/assets/imgs/play.png'
+    this.pauseImage = './myComponents/assets/imgs/pause.png'
 
     console.log("URL de base du composant : " + getBaseURL())
   }
@@ -529,13 +388,13 @@ class MyAudioPlayer extends HTMLElement {
     this.player.volume = 0.5;
 
 
-    this.filters.forEach((filter, index) => {
-      this.shadowRoot.querySelector("#eq" + index).oninput = (event) => {
-        this.changeSpecificFreqGain(parseFloat(event.target.value), index);
+    // this.filters.forEach((filter, index) => {
+    //   this.shadowRoot.querySelector("#eq" + index).oninput = (event) => {
+    //     this.changeSpecificFreqGain(parseFloat(event.target.value), index);
 
-        console.log("gain =  " + parseFloat(event.target.value) + " " + filter);
-      }
-    });
+    //     console.log("gain =  " + parseFloat(event.target.value) + " " + filter);
+    //   }
+    // });
 
 
 
@@ -603,8 +462,9 @@ class MyAudioPlayer extends HTMLElement {
 
     window.onload = () => {
 
-
       //this.audioPlayer = document.querySelector(".audio-player-info");
+
+      this.shadowRoot.querySelector('#play').src = this.playImage
 
       this.player = this.shadowRoot.querySelector("#myPlayer");
 
@@ -669,8 +529,6 @@ async buildPlaylist() {
   const reponse = await fetch(discographyURL);
   this.discography = await reponse.json();
 
-  console.log(this.discography);
-
   this.playlist = [];
   const discographyThumbnailURI = baseURL + "/" + this.discography.discographyFolder + "/out/discography_thumbnail.mp3";
   this.playlist.push({
@@ -700,13 +558,13 @@ async buildPlaylist() {
 
   //console.log(this.albumNamesList);
   // update ul of album names
-  this.albumNamesList.forEach((name, index) => {
-    let li = document.createElement("li");
-    li.id = "album_" + index;
-    li.innerHTML = name;
+  // this.albumNamesList.forEach((name, index) => {
+  //   let li = document.createElement("li");
+  //   li.id = "album_" + index;
+  //   li.innerHTML = name;
 
-    this.albumNamesListUL.append(li);
-  }); 
+  //   this.albumNamesListUL.append(li);
+  // }); 
 
 }
   drawProgressBar() {
@@ -728,7 +586,7 @@ async buildPlaylist() {
     this.analyser.getByteTimeDomainData(this.dataArray);
 
     this.canvasContextS.lineWidth = 2;
-    this.canvasContextS.strokeStyle = 'purple';
+    this.canvasContextS.strokeStyle = '#8fce00';
 
     // all the waveform is in one single path, first let's
     // clear any previous path that could be in the buffer
@@ -785,7 +643,8 @@ async buildPlaylist() {
       barHeight = this.dataArray[i];
 
 
-      this.canvasContextV.fillStyle = 'rgb(128,' + (barHeight / 10) + ',128)';
+      // this.canvasContextV.fillStyle = 'rgb(128,' + (barHeight / 10) + ',128)';
+      this.canvasContextV.fillStyle = 'rgb(143, 206, 0)'
       barHeight *= this.heightScale;
       this.canvasContextV.fillRect(x, this.canvasVisual.height - barHeight / 2, barWidth, barHeight / 2);
 
@@ -802,8 +661,8 @@ async buildPlaylist() {
     this.canvasContextB.fillStyle = this.gradient;
 
 
-    this.shadowRoot.querySelector("#peakR").value = this.decibelRight;
-    this.shadowRoot.querySelector("#peakL").value = this.decibelLeft;
+    // this.shadowRoot.querySelector("#peakR").value = this.decibelRight;
+    // this.shadowRoot.querySelector("#peakL").value = this.decibelLeft;
 
 
     // left channel
@@ -840,10 +699,10 @@ async buildPlaylist() {
   initializeBalance() {
     // create a vertical gradient of the height of the canvas
     this.gradient = this.canvasContextB.createLinearGradient(0, 0, 0, this.canvasSpectrum.height);
-    this.gradient.addColorStop(1, '#420080');
-    this.gradient.addColorStop(0.75, '#6c00d1');
-    this.gradient.addColorStop(0.25, '#a442ff');
-    this.gradient.addColorStop(0, '#d09eff');
+    this.gradient.addColorStop(1, '#229100'); //#420080
+    this.gradient.addColorStop(0.75, '#4aa500'); //'#6c00d1'
+    this.gradient.addColorStop(0.25, '#6dba00'); // '#a442ff'
+    this.gradient.addColorStop(0, '#8fce00'); //'#d09eff'
   }
 
 
@@ -912,6 +771,7 @@ async buildPlaylist() {
   }
 
   next() {
+    console.log("playlist has", this.playlist.length, "tracks");
     if (this.playlist.length - 1 > this.currentNbTrack) {
       console.log("playlist has", this.playlist.length, "tracks");
       this.player.src = this.playlist[this.currentNbTrack + 1].src;
@@ -925,7 +785,7 @@ async buildPlaylist() {
       this.player.src = this.playlist[this.currentNbTrack].src;
       this.shadowRoot.querySelector(".marqueeText").textContent = this.playlist[this.currentNbTrack].name;
     }
-    setTimeout(() => { this.player.play(); }, 1000);
+    setTimeout(() => { this.shadowRoot.querySelector("#play").src = this.pauseImage; this.player.play(); }, 1000);
   }
 
 
@@ -939,43 +799,50 @@ async buildPlaylist() {
 
   defineListeners() {
 
-
-
     this.shadowRoot.querySelector("#play").onclick = () => {
-          this.player.ontimeupdate = () => {
-            console.log("current time = " + this.player.currentTime);
-            // check which song extract is being played...
-            const index = Math.floor(this.player.currentTime / this.songSegmentDuration);
-            console.log("index = " + index);
+      let image = this.shadowRoot.querySelector("#play").src
+      if (image.includes('play')) {
 
-            let artist = this.discography.discographyFolder.replace("_discography", "");
+        this.player.ontimeupdate = () => {
+          // console.log("current time = " + this.player.currentTime);
+          // check which song extract is being played...
+          const index = Math.floor(this.player.currentTime / this.songSegmentDuration);
+          // console.log("index = " + index);
 
-            let albumName = this.allSongs[index].albumName;
-            albumName = albumName.substring(3);
+          let artist = this.discography.discographyFolder.replace("_discography", "");
 
-            this.shadowRoot.querySelector(".marqueeText").textContent = `${artist} - ${albumName} - ${this.allSongs[index].songName}`;
-            //this.albumBeingPlayedDiv.innerHTML = `${artist} - ${albumName} - ${this.allSongs[index].songName}`;
-            //this.extractBeingPlayedDiv.innerHTML = this.allSongs[index].songName;
+          let albumName = this.allSongs[index].albumName;
+          albumName = albumName.substring(3);
 
-            // highlight current album in the displayed list
-            const albumIndex = this.allSongs[index].albumIndex;
-            let liAlbum = this.shadowRoot.querySelector("#album_" + albumIndex);
-            if(this.previousLiAlbum)
-              this.previousLiAlbum.classList.remove("albumHighlighted")
+          this.shadowRoot.querySelector(".marqueeText").textContent = `${artist} - ${albumName} - ${this.allSongs[index].songName}`;
+          //this.albumBeingPlayedDiv.innerHTML = `${artist} - ${albumName} - ${this.allSongs[index].songName}`;
+          //this.extractBeingPlayedDiv.innerHTML = this.allSongs[index].songName;
 
-            liAlbum.classList.add("albumHighlighted");
-            this.previousLiAlbum = liAlbum;
-          }
-            this.player.play();
+          // highlight current album in the displayed list
+          // const albumIndex = this.allSongs[index].albumIndex;
+          // let liAlbum = this.shadowRoot.querySelector("#album_" + albumIndex);
+          // if(this.previousLiAlbum)
+          //   this.previousLiAlbum.classList.remove("albumHighlighted")
+
+          // liAlbum.classList.add("albumHighlighted");
+          // this.previousLiAlbum = liAlbum;
+        }
+        this.shadowRoot.querySelector("#play").src = this.pauseImage
+        this.player.play();
+
+      } else {
+        this.shadowRoot.querySelector("#play").src = this.playImage
+        this.player.pause()
+      }
     }
 
-    this.shadowRoot.querySelector("#pause").onclick = () => {
-      this.player.pause();
-    }
+    // this.shadowRoot.querySelector("#pause").onclick = () => {
+    //   this.player.pause();
+    // }
 
-    this.shadowRoot.querySelector("#avance10").onclick = () => {
-      this.player.currentTime += 10;
-    }
+    // this.shadowRoot.querySelector("#avance10").onclick = () => {
+    //   this.player.currentTime += 10;
+    // }
 
     this.shadowRoot.querySelector("#next").onclick = () => {
 
@@ -997,35 +864,35 @@ async buildPlaylist() {
     }
 
 
-    this.shadowRoot.querySelector("#sliderSpeed").oninput = (event) => {
-      this.player.playbackRate = parseFloat(event.target.value);
-      console.log("vitesse =  " + this.player.playbackRate);
-    }
+    // this.shadowRoot.querySelector("#sliderSpeed").oninput = (event) => {
+    //   this.player.playbackRate = parseFloat(event.target.value);
+    //   // console.log("vitesse =  " + this.player.playbackRate);
+    // }
 
     this.shadowRoot.querySelector("#volumeKnob").oninput = (event) => {
       this.player.volume = parseFloat(event.target.value);
-      console.log("volume =  " + this.player.volume);
+      // console.log("volume =  " + this.player.volume);
     }
 
-    this.shadowRoot.querySelector("#balanceKnob").oninput = (event) => {
-      this.stereoPanner.pan.value = parseFloat(event.target.value);
-      console.log("balance =  " + this.stereoPanner.pan.value);
-    }
+    // this.shadowRoot.querySelector("#balanceKnob").oninput = (event) => {
+    //   this.stereoPanner.pan.value = parseFloat(event.target.value);
+    //   // console.log("balance =  " + this.stereoPanner.pan.value);
+    // }
 
-    this.shadowRoot.querySelector("#detuneSlider").oninput = (event) => {
-      this.filterNode.detune.value = parseFloat(event.target.value);
-      console.log("detune =  " + this.filterNode.detune.value + " %");
-    }
+    // this.shadowRoot.querySelector("#detuneSlider").oninput = (event) => {
+    //   this.filterNode.detune.value = parseFloat(event.target.value);
+    //   // console.log("detune =  " + this.filterNode.detune.value + " %");
+    // }
 
-    this.shadowRoot.querySelector("#freqSlider").oninput = (event) => {
-      this.filterNode.frequency.value = parseFloat(event.target.value);
-      console.log("frequency =  " + this.filterNode.frequency.value + " %");
-    }
+    // this.shadowRoot.querySelector("#freqSlider").oninput = (event) => {
+    //   this.filterNode.frequency.value = parseFloat(event.target.value);
+    //   // console.log("frequency =  " + this.filterNode.frequency.value + " %");
+    // }
 
-    this.shadowRoot.querySelector("#biquadFilterTypeSelector").onchange = (event) => {
-      this.filterNode.type = event.target.value;
-      console.log("filter type =  " + this.filterNode.type);
-    }
+    // this.shadowRoot.querySelector("#biquadFilterTypeSelector").onchange = (event) => {
+    //   this.filterNode.type = event.target.value;
+    //   // console.log("filter type =  " + this.filterNode.type);
+    // }
 
 
 
