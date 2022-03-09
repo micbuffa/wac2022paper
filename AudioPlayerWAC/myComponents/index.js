@@ -58,11 +58,11 @@ template.innerHTML = /*html*/`
   }
 
   .timeline {
-    background: #fff;
+    background: #ccc;
     width: 100%;
     position: relative;
     cursor: pointer;
-    height: 5px;
+    height: 8px;
   }
 
   .progress {
@@ -305,9 +305,18 @@ class MyAudioPlayer extends HTMLElement {
     this.playImage = './myComponents/assets/imgs/play.png'
     this.pauseImage = './myComponents/assets/imgs/pause.png'
 
+    this.strokeColor = '#8fce00'
+    this.gradientColor = ['#8fce00', '#acd75a', '#c6df8f', '#dce7c1']
+
     console.log("URL de base du composant : " + getBaseURL())
   }
 
+  setColors(values) {
+    this.shadowRoot.querySelector(".progress").style.background = values.stroke
+    this.strokeColor = values.stroke
+    this.gradientColor = values.gradient
+    this.initializeBalance()
+  }
 
   buildAudioGraph() {
     const sourceNode = this.audioContext.createMediaElementSource(this.player);
@@ -570,7 +579,7 @@ class MyAudioPlayer extends HTMLElement {
     this.analyser.getByteTimeDomainData(this.dataArray);
 
     this.canvasContextS.lineWidth = 2;
-    this.canvasContextS.strokeStyle = '#8fce00';
+    this.canvasContextS.strokeStyle = this.strokeColor;
 
     // all the waveform is in one single path, first let's
     // clear any previous path that could be in the buffer
@@ -628,7 +637,8 @@ class MyAudioPlayer extends HTMLElement {
 
 
       // this.canvasContextV.fillStyle = 'rgb(128,' + (barHeight / 10) + ',128)';
-      this.canvasContextV.fillStyle = 'rgb(143, 206, 0)'
+      // this.canvasContextV.fillStyle = 'rgb(143, 206, 0)'
+      this.canvasContextV.fillStyle = this.strokeColor
       barHeight *= this.heightScale;
       this.canvasContextV.fillRect(x, this.canvasVisual.height - barHeight / 2, barWidth, barHeight / 2);
 
@@ -683,10 +693,10 @@ class MyAudioPlayer extends HTMLElement {
   initializeBalance() {
     // create a vertical gradient of the height of the canvas
     this.gradient = this.canvasContextB.createLinearGradient(0, 0, 0, this.canvasSpectrum.height);
-    this.gradient.addColorStop(1, '#229100'); //#420080
-    this.gradient.addColorStop(0.75, '#4aa500'); //'#6c00d1'
-    this.gradient.addColorStop(0.25, '#6dba00'); // '#a442ff'
-    this.gradient.addColorStop(0, '#8fce00'); //'#d09eff'
+    this.gradient.addColorStop(1, this.gradientColor[0]); //#420080
+    this.gradient.addColorStop(0.75, this.gradientColor[1]); //'#6c00d1'
+    this.gradient.addColorStop(0.25, this.gradientColor[2]); // '#a442ff'
+    this.gradient.addColorStop(0, this.gradientColor[3]); //'#d09eff'
   }
 
 
