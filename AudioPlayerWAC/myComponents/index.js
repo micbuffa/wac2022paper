@@ -853,34 +853,36 @@ class MyAudioPlayer extends HTMLElement {
   }
 
   play() {
-    let image = this.shadowRoot.querySelector("#play").src
-      if (image.includes('play')) {
+    this.player.ontimeupdate = () => {
+      // check which song extract is being played...
+      const index = Math.floor(this.player.currentTime / this.songSegmentDuration);
+      if(!this.allSongs[index]) return;
 
-        this.player.ontimeupdate = () => {
-          // check which song extract is being played...
-          const index = Math.floor(this.player.currentTime / this.songSegmentDuration);
-          if(!this.allSongs[index]) return;
+      let artist = this.discography.discographyFolder.replace("_discography", "");
 
-          let artist = this.discography.discographyFolder.replace("_discography", "");
+      
+      let albumName = this.allSongs[index].albumName;
+      albumName = albumName.substring(3);
 
-          
-          let albumName = this.allSongs[index].albumName;
-          albumName = albumName.substring(3);
+      this.shadowRoot.querySelector(".marqueeText").textContent = `${artist} - ${albumName} - ${this.allSongs[index].songName}`;
+    }
+    this.shadowRoot.querySelector("#play").src = this.pauseImage
+    this.player.play();
 
-          this.shadowRoot.querySelector(".marqueeText").textContent = `${artist} - ${albumName} - ${this.allSongs[index].songName}`;
-        }
-        this.shadowRoot.querySelector("#play").src = this.pauseImage
-        this.player.play();
+  }
 
-      } else {
-        this.shadowRoot.querySelector("#play").src = this.playImage
-        this.player.pause()
-      }
+  pause() {
+    this.shadowRoot.querySelector("#play").src = this.playImage
+    this.player.pause()
   }
 
   defineListeners() {
 
-    this.shadowRoot.querySelector("#play").onclick = () => this.play()
+    this.shadowRoot.querySelector("#play").onclick = () => {
+      let image = this.shadowRoot.querySelector("#play").src
+      if (image.includes('play')) this.play()
+      else this.pause()
+    } 
 
     // this.shadowRoot.querySelector("#pause").onclick = () => {
     //   this.player.pause();
