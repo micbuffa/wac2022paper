@@ -29,32 +29,45 @@ let port = process.env.PORT || 8010;
 
 // les routes
 const prefix = '/api';
-//const artistDiscography = "QUEEN_discography";
 
-app.get(prefix + "/discography/:artist", (req, res) =>{
+app.get(prefix + "/:artist/discography/", (req, res) =>{
   const artistDiscography = req.params.artist.toUpperCase() + "_discography";
 
     const discographyPath = path.join(__dirname + "/public/" + artistDiscography + "/out/discography.json");
     res.sendFile(discographyPath);
 })
 
-app.get(prefix + "/album/:artist/:albumName", (req, res) =>{
+app.get(prefix + "/:artist/album/:albumName", (req, res) =>{
 
   const artistDiscography = req.params.artist.toUpperCase() + "_discography";
   const discographyPath = path.join(__dirname + "/public/" + artistDiscography + "/out/discography.json");
 
   // let's read the whole discography json file
   const discoData = JSON.parse(fs.readFileSync(discographyPath));
-  console.log(discoData);
-/*
-  discoData.albums.forEach(a => {
-    console.log(a.nom.substring(3).toUpperCase());
-  })*/
 
   const albumFolder = discoData.albums.find(a => a.nom.substring(3).toUpperCase() === req.params.albumName.toUpperCase()).folder;
-    const albumPath = path.join(__dirname + "/public/" + artistDiscography + "/" + albumFolder + "/album.json");
-    //res.send(JSON.stringify(discoData));
-    res.sendFile(albumPath);
+  const albumPath = path.join(__dirname + "/public/" + artistDiscography + "/" + albumFolder + "/album.json");
+  res.sendFile(albumPath);
+})
+
+app.get(prefix + '/:artist/:album/song/:songName', (req, res) => {
+  const artistDiscography = req.params.artist.toUpperCase() + "_discography";
+  const discographyPath = path.join(__dirname + "/public/" + artistDiscography + "/out/discography.json");
+
+  // let's read the whole discography json file
+  const discoData = JSON.parse(fs.readFileSync(discographyPath));
+
+  const albumFolder = discoData.albums.find(a => a.nom.substring(3).toUpperCase() === req.params.album.toUpperCase()).folder;
+  const albumPath = path.join(__dirname + "/public/" + artistDiscography + "/" + albumFolder + "/album.json");
+
+  const albumData = JSON.parse(fs.readFileSync(albumPath))
+
+  const songData = albumData.songs.find(song => song.name.substring(3).replace('.mp3', '').replace(/_/g, ' ') === req.params.songName);
+  if (songData)
+    songData.albumFolder = albumFolder
+
+  res.send(JSON.stringify(songData))
+
 })
 
 
