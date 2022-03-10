@@ -2,6 +2,8 @@ let express = require('express');
 let path = require('path');
 let app = express();
 let bodyParser = require('body-parser');
+let fs = require('fs');
+const { receiveMessageOnPort } = require('worker_threads');
 
 // Pour accepter les connexions cross-domain (CORS)
 app.use(function (req, res, next) {
@@ -27,11 +29,32 @@ let port = process.env.PORT || 8010;
 
 // les routes
 const prefix = '/api';
-const artistDiscography = "QUEEN_discography";
+//const artistDiscography = "QUEEN_discography";
 
-app.get(prefix + "/discography", (req, res) =>{
+app.get(prefix + "/discography/:artist", (req, res) =>{
+  const artistDiscography = req.params.artist.toUpperCase() + "_discography";
+
     const discographyPath = path.join(__dirname + "/public/" + artistDiscography + "/out/discography.json");
     res.sendFile(discographyPath);
+})
+
+app.get(prefix + "/album/:artist/:albumName", (req, res) =>{
+
+  const artistDiscography = req.params.artist.toUpperCase() + "_discography";
+  const discographyPath = path.join(__dirname + "/public/" + artistDiscography + "/out/discography.json");
+
+  // let's read the whole discography json file
+  const discoData = JSON.parse(fs.readFileSync(discographyPath));
+  console.log(discoData);
+/*
+  discoData.albums.forEach(a => {
+    console.log(a.nom.substring(3).toUpperCase());
+  })*/
+
+  const albumFolder = discoData.albums.find(a => a.nom.substring(3).toUpperCase() === req.params.albumName.toUpperCase()).folder;
+    const albumPath = path.join(__dirname + "/public/" + artistDiscography + "/" + albumFolder + "/album.json");
+    //res.send(JSON.stringify(discoData));
+    res.sendFile(albumPath);
 })
 
 
@@ -48,6 +71,8 @@ app.get(prefix + "/play", (req, res) =>{
     //console.log("SONG " + songPath + " REQUESTED")
     res.sendFile(songPath);
 })
+
+
 /*
 app.route(prefix + '/assignments')
   .get(assignment.getAssignments)

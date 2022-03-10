@@ -386,7 +386,7 @@ class MyAudioPlayer extends HTMLElement {
     this.filterNode = this.audioContext.createBiquadFilter();
     this.filterNode.type = "lowpass";
     this.filterNode.frequency.value = 11025;
-    
+
     currentNode.connect(this.filterNode);
 
     this.filterNode.connect(this.analyser);
@@ -666,7 +666,7 @@ class MyAudioPlayer extends HTMLElement {
 
 
     // draw the vertical meter for left channel
-    this.canvasContextB.fillRect(0, this.canvasSpectrum.height - this.averageLeft, this.canvasSpectrum.width/2, this.canvasSpectrum.height );
+    this.canvasContextB.fillRect(0, this.canvasSpectrum.height - this.averageLeft, this.canvasSpectrum.width / 2, this.canvasSpectrum.height);
 
     // right channel
     this.analyserRight.getByteFrequencyData(this.dataArrayRight);
@@ -675,7 +675,7 @@ class MyAudioPlayer extends HTMLElement {
 
 
     // draw the vertical meter for left channel
-    this.canvasContextB.fillRect((this.canvasSpectrum.width/2)+1, this.canvasSpectrum.height - this.averageRight, (this.canvasSpectrum.width/2)-1, this.canvasSpectrum.height);
+    this.canvasContextB.fillRect((this.canvasSpectrum.width / 2) + 1, this.canvasSpectrum.height - this.averageRight, (this.canvasSpectrum.width / 2) - 1, this.canvasSpectrum.height);
 
 
     this.canvasContextB.restore();
@@ -777,7 +777,7 @@ class MyAudioPlayer extends HTMLElement {
     // next will go to the next album
     let index = Math.floor(this.player.currentTime / this.songSegmentDuration);
 
-    if(!this.allSongs[index]) {
+    if (!this.allSongs[index]) {
       this.player.currentTime = this.allSongs.length * this.songSegmentDuration;
       return;
     }
@@ -786,9 +786,9 @@ class MyAudioPlayer extends HTMLElement {
 
     // look for the first song of the next album
     let i = index;
-    while(this.allSongs[i].albumName === albumName) {
+    while (this.allSongs[i].albumName === albumName) {
       i++;
-      if(!this.allSongs[i]) {
+      if (!this.allSongs[i]) {
         this.player.currentTime = 0;
         this.player.pause;
         return;
@@ -796,7 +796,7 @@ class MyAudioPlayer extends HTMLElement {
     }
     index = i;
     // let's fast forward the player to the new "currentTime" for the beginning of the new album
-    let newAlbumStartingTime = index*this.songSegmentDuration;
+    let newAlbumStartingTime = index * this.songSegmentDuration;
     this.player.currentTime = newAlbumStartingTime;
     /*
     console.log("playlist has", this.playlist.length, "tracks");
@@ -826,16 +826,16 @@ class MyAudioPlayer extends HTMLElement {
 
     // look for the first song of the next album
     let i = index;
-    while(this.allSongs[i].albumName === albumName) {
+    while (this.allSongs[i].albumName === albumName) {
       i--;
-      if(i < 0) {
+      if (i < 0) {
         this.player.currentTime = 0;
         return;
       }
     }
     index = i;
     // let's fast forward the player to the new "currentTime" for the beginning of the new album
-    let newAlbumStartingTime = index*this.songSegmentDuration;
+    let newAlbumStartingTime = index * this.songSegmentDuration;
     this.player.currentTime = newAlbumStartingTime;
     /*
     if (this.currentNbTrack === 0) {
@@ -852,20 +852,45 @@ class MyAudioPlayer extends HTMLElement {
     */
   }
 
-  play() {
+  play(target) {
+    console.log("Play() type = " + target.type);
+
+    switch (target.type) {
+      case "album":
+        this.player.mode = "album";
+
+        const baseURL = "http://localhost:8010";
+        const apiURL = baseURL + "/api";
+        const albumURL = `${apiURL}/album/${target.artist}/${target.name}`;
+
+        const reponse = await fetch(albumURL);
+        const fetchedAlbum = await reponse.json();
+        console.log("fetched album : ", fetchedAlbum);
+        // Let's
+        break;
+      case "song":
+        this.player.mode = "song";
+        break;
+      default: 
+        // discography
+        this.player.mode = "discography";
+        break;
+    }
+
     this.player.ontimeupdate = () => {
       // check which song extract is being played...
       const index = Math.floor(this.player.currentTime / this.songSegmentDuration);
-      if(!this.allSongs[index]) return;
+      if (!this.allSongs[index]) return;
 
       let artist = this.discography.discographyFolder.replace("_discography", "");
 
-      
+
       let albumName = this.allSongs[index].albumName;
       albumName = albumName.substring(3);
 
       this.shadowRoot.querySelector(".marqueeText").textContent = `${artist} - ${albumName} - ${this.allSongs[index].songName}`;
     }
+
     this.shadowRoot.querySelector("#play").src = this.pauseImage
     this.player.play();
 
@@ -882,7 +907,7 @@ class MyAudioPlayer extends HTMLElement {
       let image = this.shadowRoot.querySelector("#play").src
       if (image.includes('play')) this.play()
       else this.pause()
-    } 
+    }
 
     // this.shadowRoot.querySelector("#pause").onclick = () => {
     //   this.player.pause();
