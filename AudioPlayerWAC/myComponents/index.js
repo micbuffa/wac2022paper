@@ -396,6 +396,8 @@ class MyAudioPlayer extends HTMLElement {
     this.stereoPanner.connect(this.splitter);
 
     this.player.volume = 0.5;
+
+    this.player.mode = "none"
   }
 
   clearAllCanvas() {
@@ -452,7 +454,7 @@ class MyAudioPlayer extends HTMLElement {
     // fix relative URLs
     this.fixRelativeURLs();
 
-    window.onload = () => {
+    //window.onload = () => {
 
       //this.audioPlayer = document.querySelector(".audio-player-info");
 
@@ -500,7 +502,7 @@ class MyAudioPlayer extends HTMLElement {
       // this.extractBeingPlayedDiv = this.shadowRoot.querySelector(".songSegmentName");
       // this.albumBeingPlayedDiv = this.shadowRoot.querySelector(".albumName");
 
-    }
+    //}
 
 
     // on définit les écouteurs etc.
@@ -517,7 +519,7 @@ class MyAudioPlayer extends HTMLElement {
     const baseURL = "http://localhost:8010";
     const apiURL = baseURL + "/api";
 
-    const discographyURL = apiURL + "/" + "discography";
+    const discographyURL = apiURL + "/" + "discography/QUEEN";
     const reponse = await fetch(discographyURL);
     this.discography = await reponse.json();
 
@@ -852,7 +854,7 @@ class MyAudioPlayer extends HTMLElement {
     */
   }
 
-  play(target) {
+  async play(target) {
     console.log("Play() type = " + target.type);
 
     switch (target.type) {

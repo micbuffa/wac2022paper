@@ -1,4 +1,4 @@
-export default dataAline = {
+const dataAline = {
   "items": [
     {
       "id": "5714decc25ac0d8aee3ed7f2",
@@ -98874,3 +98874,5 @@ export default dataAline = {
     }
   }
 }
+
+export {dataAline}
