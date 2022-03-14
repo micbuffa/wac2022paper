@@ -487,11 +487,11 @@ class MyAudioPlayer extends HTMLElement {
       this.playlist = [];
 
       (async () => {
-        await this.buildPlaylist();
+        // await this.buildPlaylist();
 
-        this.currentNbTrack = 0;
+        // this.currentNbTrack = 0;
 
-        this.player.src = this.playlist[this.currentNbTrack].src;
+        // this.player.src = this.playlist[this.currentNbTrack].src;
 
 
         //this.shadowRoot.querySelector(".marqueeText").textContent = this.playlist[this.currentNbTrack].name;
@@ -509,57 +509,109 @@ class MyAudioPlayer extends HTMLElement {
     this.defineListeners();
   }
 
-  async buildPlaylist() {
+  async buildPlaylist(target) {
 
-    // for displaying album names
-    this.albumNamesListUL = this.shadowRoot.querySelector("#albumNamesList");
+    this.artist = target.artist.name || target.artist
+    const discographyFolder = this.artist.toLowerCase().replace(' ', '_') + '_discography'
 
-
-    // fetch discography from wac server
     const baseURL = "http://localhost:8010";
     const apiURL = baseURL + "/api";
+    let response = null
 
-    const discographyURL = apiURL + "/" + "discography/QUEEN";
-    const reponse = await fetch(discographyURL);
-    this.discography = await reponse.json();
+    switch (target.type) {
+      case "album":
+        this.player.mode = "album";       
+        const albumURL = `${apiURL}/${this.artist}/album/${target.name}`;
 
-    this.playlist = [];
-    const discographyThumbnailURI = baseURL + "/" + this.discography.discographyFolder + "/out/discography_thumbnail.mp3";
-    this.playlist.push({
-      name: "discography_thumbnail.mp3",
-      src: discographyThumbnailURI
-    });
+        response = await fetch(albumURL);
+        this.album = await response.json();
 
-    // compute a flat array with all songs from all albums
-    this.allSongs = [];
-    this.songSegmentDuration = this.discography.interval;
+        
+        const albumThumbnailURL = baseURL + "/" + discographyFolder + '/' + this.album.folder + "/out/album_thumbnail.mp3";
+        
+        this.playlist = [{
+          name: "album_thumbnail.mp3",
+          src: albumThumbnailURL
+        }];
 
-    const albums = this.discography.albums;
-    this.albumNamesList = [];
+        // compute a flat array with all songs from all albums
+        this.allSongs = [];
+        this.songSegmentDuration = this.album.interval;
 
-    albums.forEach((a, index) => {
-      const albumName = a.nom;
-      this.albumNamesList.push(albumName);
-
-      a.songs.forEach(song => {
-        this.allSongs.push({
-          albumName: albumName,
-          albumIndex: index,
-          songName: song
+        this.album.songs.forEach((song, index) => {
+          this.allSongs.push({
+            albumName: target.name,
+            songName: song.name.replace(/_/g, ' ')
+          });
         });
-      })
-    });
+        // Let's
+        break;
+      case "song":
+        this.player.mode = "song";
 
-    //console.log(this.albumNamesList);
-    // update ul of album names
-    // this.albumNamesList.forEach((name, index) => {
-    //   let li = document.createElement("li");
-    //   li.id = "album_" + index;
-    //   li.innerHTML = name;
+        const songURL = `${apiURL}/${this.artist}/${target.parentName}/song/${target.name}`;
 
-    //   this.albumNamesListUL.append(li);
-    // }); 
+        response = await fetch(songURL);
+        this.song = await response.json();
 
+        const songAudioURL = baseURL + "/" + discographyFolder + '/' + this.song.albumFolder + "/" + this.song.fileName;
+        
+        this.playlist = [{
+          name: "song_audio.mp3",
+          src: songAudioURL
+        }];
+
+        this.allSongs = [{
+          albumName: this.song.albumFolder.substring(3).replaceAll('_', ' '),
+          songName: this.song.name.replace(/_/g, ' ')
+        }]
+
+        break;
+      default: 
+        // discography
+        this.player.mode = "discography";
+
+        // for displaying album names
+        this.albumNamesListUL = this.shadowRoot.querySelector("#albumNamesList");
+
+        const discographyURL = apiURL + "/" + this.artist + "/discography";
+        response = await fetch(discographyURL);
+  
+        this.discography = await response.json();
+
+        const discographyThumbnailURI = baseURL + "/" + discographyFolder + "/out/discography_thumbnail.mp3";
+        this.playlist = [{
+          name: "discography_thumbnail.mp3",
+          src: discographyThumbnailURI
+        }];
+
+        console.log(this.playlist)
+
+        // compute a flat array with all songs from all albums
+        this.allSongs = [];
+        this.songSegmentDuration = this.discography.interval;
+
+        const albums = this.discography.albums;
+        this.albumNamesList = [];
+
+        albums.forEach((a, index) => {
+          const albumName = a.nom;
+          this.albumNamesList.push(albumName);
+
+          a.songs.forEach(song => {
+            this.allSongs.push({
+              albumName: albumName.substring(3),
+              albumIndex: index,
+              songName: song
+            });
+          })
+        });
+      break;
+    }
+
+    this.currentNbTrack = 0;
+
+    this.player.src = this.playlist[this.currentNbTrack].src;
   }
 
   drawProgressBar() {
@@ -857,41 +909,31 @@ class MyAudioPlayer extends HTMLElement {
   async play(target) {
     console.log("Play() type = " + target.type);
 
-    switch (target.type) {
-      case "album":
-        this.player.mode = "album";
+    await this.buildPlaylist(target)
+    
+    
+    // if (this.player.mode === 'song') {
+    //   this.shadowRoot.querySelector(".marqueeText").textContent = `${mode} \xa0\xa0\xa0\xa0   ${this.artist} - ${this.song.albumFolder.substring(3).replaceAll('_', ' ')} - ${this.song.name}`;
+    // }
 
-        const baseURL = "http://localhost:8010";
-        const apiURL = baseURL + "/api";
-        const albumURL = `${apiURL}/album/${target.artist}/${target.name}`;
+    // else {
+      this.player.ontimeupdate = () => {
 
-        const reponse = await fetch(albumURL);
-        const fetchedAlbum = await reponse.json();
-        console.log("fetched album : ", fetchedAlbum);
-        // Let's
-        break;
-      case "song":
-        this.player.mode = "song";
-        break;
-      default: 
-        // discography
-        this.player.mode = "discography";
-        break;
-    }
+        // check which song extract is being played...
+        const index = this.player.mode === 'song' ? 0 : Math.floor(this.player.currentTime / this.songSegmentDuration);
+        if (!this.allSongs[index]) return;
 
-    this.player.ontimeupdate = () => {
-      // check which song extract is being played...
-      const index = Math.floor(this.player.currentTime / this.songSegmentDuration);
-      if (!this.allSongs[index]) return;
+        // let artist = this[this.player.mode].folder.replace("_discography", "");
 
-      let artist = this.discography.discographyFolder.replace("_discography", "");
+        // let albumName = this.allSongs[index].albumName;
+        // albumName = albumName.substring(3);
+        let mode = this.player.mode.charAt(0).toUpperCase() + this.player.mode.slice(1)
+        // let songName = this.player.mode === 'song' ? this.song.name : this.allSongs[index].songName
+        // let albumName = this.player.mode === 'song' ? this.song.albumFolder.substring(3).replaceAll('_', ' ') : this.allSongs[index].albumName
 
-
-      let albumName = this.allSongs[index].albumName;
-      albumName = albumName.substring(3);
-
-      this.shadowRoot.querySelector(".marqueeText").textContent = `${artist} - ${albumName} - ${this.allSongs[index].songName}`;
-    }
+        this.shadowRoot.querySelector(".marqueeText").textContent = `${mode} \xa0\xa0\xa0\xa0   ${this.artist} - ${this.allSongs[index].albumName} - ${this.allSongs[index].songName}`;
+      }
+    // }
 
     this.shadowRoot.querySelector("#play").src = this.pauseImage
     this.player.play();
@@ -967,7 +1009,14 @@ class MyAudioPlayer extends HTMLElement {
 
   // return the information being displayed
   getPlayerInfo() {
-    return this.shadowRoot.querySelector(".marqueeText").textContent
+    const index = this.player.mode === 'song' ? 0 : Math.floor(this.player.currentTime / this.songSegmentDuration);
+    if (!this.allSongs[index]) return;
+
+    return {
+      artist: this.artist,
+      song: this.allSongs[index].songName,
+      album: this.allSongs[index].albumName
+    }
   }
 
   // to know whether is playing or not
