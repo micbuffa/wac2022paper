@@ -37,7 +37,7 @@ app.get(prefix + "/:artist/discography/", (req, res) =>{
     res.sendFile(discographyPath);
 })
 
-app.get(prefix + "/:artist/album/:albumName", (req, res) =>{
+app.get(prefix + "/:artist/album/:id", (req, res) =>{
 
   const artistDiscography = req.params.artist.toUpperCase() + "_discography";
   const discographyPath = path.join(__dirname + "/public/" + artistDiscography + "/out/discography.json");
@@ -45,24 +45,24 @@ app.get(prefix + "/:artist/album/:albumName", (req, res) =>{
   // let's read the whole discography json file
   const discoData = JSON.parse(fs.readFileSync(discographyPath));
 
-  const albumFolder = discoData.albums.find(a => a.nom.substring(3).toUpperCase() === req.params.albumName.toUpperCase()).folder;
+  const albumFolder = discoData.albums.find(a => a.id === req.params.id).folder;
   const albumPath = path.join(__dirname + "/public/" + artistDiscography + "/" + albumFolder + "/album.json");
   res.sendFile(albumPath);
 })
 
-app.get(prefix + '/:artist/:album/song/:songName', (req, res) => {
+app.get(prefix + '/:artist/:album/song/:id', (req, res) => {
   const artistDiscography = req.params.artist.toUpperCase() + "_discography";
   const discographyPath = path.join(__dirname + "/public/" + artistDiscography + "/out/discography.json");
 
   // let's read the whole discography json file
   const discoData = JSON.parse(fs.readFileSync(discographyPath));
 
-  const albumFolder = discoData.albums.find(a => a.nom.substring(3).toUpperCase() === req.params.album.toUpperCase()).folder;
+  const albumFolder = discoData.albums.find(a => a.id === req.params.album).folder;
   const albumPath = path.join(__dirname + "/public/" + artistDiscography + "/" + albumFolder + "/album.json");
 
   const albumData = JSON.parse(fs.readFileSync(albumPath))
 
-  const songData = albumData.songs.find(song => song.name.substring(3).replace('.mp3', '').replace(/_/g, ' ') === req.params.songName);
+  const songData = albumData.songs.find(song => song.id === req.params.id);
   if (songData)
     songData.albumFolder = albumFolder
 
