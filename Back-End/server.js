@@ -31,7 +31,7 @@ let port = process.env.PORT || 8010;
 const prefix = '/api';
 
 app.get(prefix + "/:artist/discography/", (req, res) =>{
-  const artistDiscography = req.params.artist.toUpperCase() + "_discography";
+  const artistDiscography = req.params.artist.toUpperCase().replace(' ', '_') + "_discography";
 
     const discographyPath = path.join(__dirname + "/public/" + artistDiscography + "/out/discography.json");
     res.sendFile(discographyPath);
@@ -39,7 +39,7 @@ app.get(prefix + "/:artist/discography/", (req, res) =>{
 
 app.get(prefix + "/:artist/album/:id", (req, res) =>{
 
-  const artistDiscography = req.params.artist.toUpperCase() + "_discography";
+  const artistDiscography = req.params.artist.toUpperCase().replace(' ', '_') + "_discography";
   const discographyPath = path.join(__dirname + "/public/" + artistDiscography + "/out/discography.json");
 
   // let's read the whole discography json file
@@ -51,7 +51,7 @@ app.get(prefix + "/:artist/album/:id", (req, res) =>{
 })
 
 app.get(prefix + '/:artist/:album/song/:id', (req, res) => {
-  const artistDiscography = req.params.artist.toUpperCase() + "_discography";
+  const artistDiscography = req.params.artist.toUpperCase().replace(' ', '_')  + "_discography";
   const discographyPath = path.join(__dirname + "/public/" + artistDiscography + "/out/discography.json");
 
   // let's read the whole discography json file
