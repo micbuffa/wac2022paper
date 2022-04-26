@@ -18,7 +18,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
 // Serve only the static files form the dist directory
-app.use(express.static(__dirname + "/public"));
+// app.use(express.static(__dirname + "/public"));
 
 /*
 app.get("/*", function (req, res) {
@@ -29,6 +29,8 @@ let port = process.env.PORT || 8010;
 
 // les routes
 const prefix = '/api';
+
+app.use('/api/', express.static(path.join(__dirname, 'public')))
 
 app.get(prefix + "/:artist/discography/", (req, res) =>{
   const artistDiscography = req.params.artist.toUpperCase().replace(' ', '_') + "_discography";
